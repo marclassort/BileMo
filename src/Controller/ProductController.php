@@ -10,12 +10,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use OpenApi\Annotations as OA;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 #[Route('/api/products', name: 'api_products_')]
 class ProductController extends AbstractController
 {
     private $cache;
-    private $serializer;
+    private $paginator;
 
     public function __construct(SerializerInterface $serializer)
     {
@@ -23,6 +25,10 @@ class ProductController extends AbstractController
         $this->serializer = $serializer;
     }
 
+    #[OA\Response(
+        response: 200,
+        description: 'Returns all products'
+    )]
     #[Route('', name: 'all', methods: ['GET'])]
     public function all(ProductRepository $productRepository, Request $request): JsonResponse
     {
@@ -48,13 +54,24 @@ class ProductController extends AbstractController
         );
     }
 
+    #[OA\Response(
+        response: 200,
+        description: 'Returns a specific product'
+    )]
     #[Route('/{id}', name: 'get', methods: ['GET'])]
-    public function product(
-        ProductRepository $productRepository,
-        SerializerInterface $serializer,
-        $id
-    ): JsonResponse {
+    public function product($id, ProductRepository $productRepository): JsonResponse
+    {
         $product = $productRepository->findOneById($id);
+
+        $response = $this->cache->get('product_test_' . $product->getId(), function (ItemInterface $item, $product) {
+            $item->expiresAfter(3600);
+
+            if (!$product) {
+                throw new HttpException(404);
+            }
+
+            return $this->serializer->serialize($product, 'json');
+        });
 
         if (!isset($product) or $product === NULL) {
             $message = "Aucun contenu n'a été trouvé.";
@@ -68,7 +85,7 @@ class ProductController extends AbstractController
             return $response;
         } else {
             return new JsonResponse(
-                $serializer->serialize($product, 'json', ['groups' => 'product']),
+                $response,
                 JsonResponse::HTTP_OK,
                 [],
                 true

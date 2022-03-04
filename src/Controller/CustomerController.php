@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api/customers', name: 'api_customers_')]
 class CustomerController extends AbstractController
 {
-    #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
+    #[Route('/create', name: 'create', methods: ['POST'])]
     public function create(
         Request $request,
         SerializerInterface $serializer,

@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
+#[Route('/api/users/', name: 'api_users_')]
 class UserController extends AbstractController
 {
     private $cache;
@@ -22,7 +23,7 @@ class UserController extends AbstractController
         $this->serializer = $serializer;
     }
 
-    #[Route('/api/users/customer/{customerId}', name: 'api_users_get_by_customer', methods: ['GET'])]
+    #[Route('customer/{customerId}', name: 'all_by_customer', methods: ['GET'])]
     public function getUserForCustomer(UserRepository $userRepository, Request $request, $customerId): JsonResponse
     {
         if (0 < intval($request->query->get('page'))) {
@@ -45,22 +46,19 @@ class UserController extends AbstractController
             [],
             true
         );
-
-        // $users = $this->serializer->serialize($userRepository->findByCustomer([$customerId]));
-
-        // return new JsonResponse(
-        //     $this->serializer->serialize($userRepository->findByCustomer([$customerId]), 'json', ['groups' => 'user']),
-        //     JsonResponse::HTTP_OK,
-        //     [],
-        //     true
-        // );
     }
 
-    #[Route('/api/users/{id}', name: 'api_user_get', methods: ['GET'])]
-    public function user(UserRepository $userRepository, $id): JsonResponse
+    #[Route('{id}', name: 'get', methods: ['GET'])]
+    public function user($id): JsonResponse
     {
+        $response = $this->cache->get('user_' . $id, function (ItemInterface $item, UserRepository $userRepository, $id) {
+            $item->expiresAfter(3600);
+
+            return $this->serializer->serialize($userRepository->findOneById([$id]), 'json', ['groups' => 'user']);
+        });
+
         return new JsonResponse(
-            $this->serializer->serialize($userRepository->findOneById([$id]), 'json', ['groups' => 'user']),
+            $response,
             JsonResponse::HTTP_OK,
             [],
             true
