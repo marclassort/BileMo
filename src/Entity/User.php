@@ -3,47 +3,48 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(["user"])]
     private $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Groups(["user"])]
     private $username;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["user"])]
     private $firstName;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["user"])]
     private $lastName;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["user"])]
     private $password;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Groups(["user"])]
     private $email;
 
     #[ORM\Column(type: 'array')]
     private $role = [];
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Product::class, orphanRemoval: true)]
-    private $products;
+    #[ORM\Column(type: 'array')]
+    private $roles = [];
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class, orphanRemoval: true)]
-    private $customers;
-
-    public function __construct()
-    {
-        $this->products = new ArrayCollection();
-        $this->customers = new ArrayCollection();
-    }
+    #[ORM\ManyToOne(targetEntity: Customer::class, inversedBy: 'users')]
+    private $customer;
 
     public function getId(): ?int
     {
@@ -122,63 +123,45 @@ class User
         return $this;
     }
 
-    /**
-     * @return Collection|Product[]
-     */
-    public function getProducts(): Collection
+    public function getCustomer(): ?Customer
     {
-        return $this->products;
+        return $this->customer;
     }
 
-    public function addProduct(Product $product): self
+    public function setCustomer(?Customer $customer): self
     {
-        if (!$this->products->contains($product)) {
-            $this->products[] = $product;
-            $product->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProduct(Product $product): self
-    {
-        if ($this->products->removeElement($product)) {
-            // set the owning side to null (unless already changed)
-            if ($product->getUser() === $this) {
-                $product->setUser(null);
-            }
-        }
+        $this->customer = $customer;
 
         return $this;
     }
 
     /**
-     * @return Collection|Customer[]
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
      */
-    public function getCustomers(): Collection
+    public function getUserIdentifier(): string
     {
-        return $this->customers;
+        return (string) $this->email;
     }
 
-    public function addCustomer(Customer $customer): self
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        if (!$this->customers->contains($customer)) {
-            $this->customers[] = $customer;
-            $customer->setUser($this);
-        }
-
-        return $this;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
     }
 
-    public function removeCustomer(Customer $customer): self
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
     {
-        if ($this->customers->removeElement($customer)) {
-            // set the owning side to null (unless already changed)
-            if ($customer->getUser() === $this) {
-                $customer->setUser(null);
-            }
-        }
-
-        return $this;
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 }

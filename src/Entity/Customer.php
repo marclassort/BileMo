@@ -6,13 +6,16 @@ use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
-class Customer
+class Customer implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(["customer"])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -45,16 +48,12 @@ class Customer
     #[ORM\Column(type: 'array')]
     private $role = [];
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'customers')]
-    #[ORM\JoinColumn(nullable: false)]
-    private $user;
-
-    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'customers')]
-    private $products;
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: User::class)]
+    private $users;
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -182,40 +181,31 @@ class Customer
         return $this;
     }
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
     /**
-     * @return Collection|Product[]
+     * @return Collection|User[]
      */
-    public function getProducts(): Collection
+    public function getUsers(): Collection
     {
-        return $this->products;
+        return $this->users;
     }
 
-    public function addProduct(Product $product): self
+    public function addUser(User $user): self
     {
-        if (!$this->products->contains($product)) {
-            $this->products[] = $product;
-            $product->addCustomer($this);
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setCustomer($this);
         }
 
         return $this;
     }
 
-    public function removeProduct(Product $product): self
+    public function removeUser(User $user): self
     {
-        if ($this->products->removeElement($product)) {
-            $product->removeCustomer($this);
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getCustomer() === $this) {
+                $user->setCustomer(null);
+            }
         }
 
         return $this;

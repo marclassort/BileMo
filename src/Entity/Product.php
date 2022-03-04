@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -15,48 +13,43 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    /**
-     * @Groups({"group1"})
-     */
+    #[Groups(["product"])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    /**
-     * @Groups({"group1"})
-     * @Assert\NotBlank
-     * @Assert\Length(min=3)
-     */
+    #[Assert\NotBlank]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'Le nom du produit doit faire au moins {{ limit }} caractères.',
+        maxMessage: 'Le nom du produit ne doit pas faire plus de {{ limit }} caractères.'
+    )]
+    #[Groups(["product"])]
     private $name;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'text')]
+    #[Groups(["product"])]
     private $description;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["product"])]
     private $reference;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["product"])]
     private $constructor;
 
     #[ORM\Column(type: 'float')]
+    #[Groups(["product"])]
     private $priceExcludingTaxes;
 
     #[ORM\Column(type: 'float')]
+    #[Groups(["product"])]
     private $VAT;
 
     #[ORM\Column(type: 'integer')]
+    #[Groups(["product"])]
     private $stock;
-
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'products')]
-    #[ORM\JoinColumn(nullable: false)]
-    private $user;
-
-    #[ORM\ManyToMany(targetEntity: Customer::class, inversedBy: 'products')]
-    private $customers;
-
-    public function __construct()
-    {
-        $this->customers = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -143,42 +136,6 @@ class Product
     public function setStock(int $stock): self
     {
         $this->stock = $stock;
-
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Customer[]
-     */
-    public function getCustomers(): Collection
-    {
-        return $this->customers;
-    }
-
-    public function addCustomer(Customer $customer): self
-    {
-        if (!$this->customers->contains($customer)) {
-            $this->customers[] = $customer;
-        }
-
-        return $this;
-    }
-
-    public function removeCustomer(Customer $customer): self
-    {
-        $this->customers->removeElement($customer);
 
         return $this;
     }

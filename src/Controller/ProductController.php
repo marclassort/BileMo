@@ -2,59 +2,77 @@
 
 namespace App\Controller;
 
-use App\Entity\Product;
 use App\Repository\ProductRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
+#[Route('/api/products', name: 'api_products_')]
 class ProductController extends AbstractController
 {
-    #[Route('/', name: 'home', methods: ['GET'])]
-    public function home(ProductRepository $productRepository): Response
+    private $cache;
+    private $serializer;
+
+    public function __construct(SerializerInterface $serializer)
     {
-        return $this->json($productRepository->findAll(), 200, [], ['groups' => 'group1']);
+        $this->cache = new FilesystemAdapter();
+        $this->serializer = $serializer;
     }
 
-    #[Route('/product', name: 'product', methods: ['GET', 'POST'])]
-    public function index(ProductRepository $productRepository): Response
+    #[Route('', name: 'all', methods: ['GET'])]
+    public function all(ProductRepository $productRepository, Request $request): JsonResponse
     {
-        $products = $productRepository->findAll();
+        if (0 < intval($request->query->get('page'))) {
+            $page = intval($request->query->get('page'));
+        } else {
+            $page = 1;
+        }
 
-        return $this->json([
-            'message' => 'Welcome to product page!',
-            'path' => 'src/Controller/ProductController.php',
-        ]);
+        $this->paginator = $productRepository->getPaginatedProducts($page);
+
+        $response = $this->cache->get('product_collection_' . $page, function (ItemInterface $item) {
+            $item->expiresAfter(3600);
+
+            return $this->serializer->serialize($this->paginator, 'json', ['groups' => 'product']);
+        });
+
+        return new JsonResponse(
+            $response,
+            JsonResponse::HTTP_OK,
+            [],
+            true
+        );
     }
 
-    #[Route('/', name: 'api_create', methods: ['POST'])]
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator)
-    {
-        $jsonReceived = $request->getContent();
+    #[Route('/{id}', name: 'get', methods: ['GET'])]
+    public function product(
+        ProductRepository $productRepository,
+        SerializerInterface $serializer,
+        $id
+    ): JsonResponse {
+        $product = $productRepository->findOneById($id);
 
-        try {
-            $product = $serializer->deserialize($jsonReceived, Product::class, 'json');
+        if (!isset($product) or $product === NULL) {
+            $message = "Aucun contenu n'a été trouvé.";
 
-            $errors = $validator->validate($product);
+            $response = new JsonResponse();
 
-            if (count($errors) > 0) {
-                return $this->json($errors, 400);
-            }
+            $response->setContent($message);
 
-            $em->persist($product);
-            $em->flush();
+            $response->setStatusCode(JsonResponse::HTTP_NO_CONTENT);
 
-            return $this->json($product, 201, [], ['groups' => 'group1']);
-        } catch (NotEncodableValueException $e) {
-            return $this->json([
-                'status' => 400,
-                'message' => $e->getMessage()
-            ], 400);
+            return $response;
+        } else {
+            return new JsonResponse(
+                $serializer->serialize($product, 'json', ['groups' => 'product']),
+                JsonResponse::HTTP_OK,
+                [],
+                true
+            );
         }
     }
 }
