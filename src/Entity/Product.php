@@ -6,14 +6,21 @@ use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
+#[Hateoas\Relation(
+    "self",
+    href: "expr('/api/products/' ~ object.getId())"
+)]
 class Product
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     #[Groups(["product"])]
+    #[Serializer\Groups(['read'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]

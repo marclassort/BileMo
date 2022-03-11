@@ -13,23 +13,21 @@ use Symfony\Contracts\Cache\ItemInterface;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-#[Route('/api/products', name: 'api_products_')]
+#[Route('/api/products')]
 class ProductController extends AbstractController
 {
     private $cache;
     private $paginator;
+    private ProductRepository $productRepository;
 
-    public function __construct(SerializerInterface $serializer)
+    public function __construct(SerializerInterface $serializer, ProductRepository $productRepository)
     {
         $this->cache = new FilesystemAdapter();
         $this->serializer = $serializer;
+        $this->productRepository = $productRepository;
     }
 
-    #[OA\Response(
-        response: 200,
-        description: 'Returns all products'
-    )]
-    #[Route('', name: 'all', methods: ['GET'])]
+    #[Route(name: 'product_list', methods: ['GET'])]
     public function all(ProductRepository $productRepository, Request $request): JsonResponse
     {
         if (0 < intval($request->query->get('page'))) {
@@ -54,42 +52,27 @@ class ProductController extends AbstractController
         );
     }
 
-    #[OA\Response(
-        response: 200,
-        description: 'Returns a specific product'
-    )]
-    #[Route('/{id}', name: 'get', methods: ['GET'])]
-    public function product($id, ProductRepository $productRepository): JsonResponse
+    #[Route('/{id}', name: 'get_product', methods: ['GET'])]
+    public function product($id): JsonResponse
     {
-        $product = $productRepository->findOneById($id);
+        $this->id = intval($id);
 
-        $response = $this->cache->get('product_test_' . $product->getId(), function (ItemInterface $item, $product) {
+        $response = $this->cache->get('product_item_' . $this->id, function (ItemInterface $item, $product) {
             $item->expiresAfter(3600);
+            $product = $this->productRepository->findOneBy(['id' => $this->id]);
 
-            if (!$product) {
+            if ($this->productRepository->findOneBy(['id' => $this->id]) === NULL || !is_int($this->id)) {
                 throw new HttpException(404);
             }
 
             return $this->serializer->serialize($product, 'json');
         });
 
-        if (!isset($product) or $product === NULL) {
-            $message = "Aucun contenu n'a été trouvé.";
-
-            $response = new JsonResponse();
-
-            $response->setContent($message);
-
-            $response->setStatusCode(JsonResponse::HTTP_NO_CONTENT);
-
-            return $response;
-        } else {
-            return new JsonResponse(
-                $response,
-                JsonResponse::HTTP_OK,
-                [],
-                true
-            );
-        }
+        return new JsonResponse(
+            $response,
+            JsonResponse::HTTP_OK,
+            [],
+            true
+        );
     }
 }
