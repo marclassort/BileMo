@@ -9,11 +9,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
 use JMS\Serializer\Annotation as Serializer;
 
+/* 
+ * @Hateoas\Relation("self", href = @Hateoas\Route("get_product", parameters = { "product" = "expr(object.getId())" }))
+ * @Hateoas\Relation("customers", href = @Hateoas\Route("product_list"))))
+ */
+
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-#[Hateoas\Relation(
-    "self",
-    href: "expr('/api/products/' ~ object.getId())"
-)]
 class Product
 {
     #[ORM\Id]
