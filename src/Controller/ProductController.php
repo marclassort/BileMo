@@ -9,9 +9,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface as JMS;
 use Symfony\Contracts\Cache\ItemInterface;
-use OpenApi\Annotations as OA;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use OpenApi\Attributes as OAT;
+use OpenApi\Annotations as OA;
 
 #[Route('/api/products')]
 class ProductController extends AbstractController
@@ -20,10 +22,11 @@ class ProductController extends AbstractController
     private $paginator;
     private ProductRepository $productRepository;
 
-    public function __construct(SerializerInterface $serializer, ProductRepository $productRepository)
+    public function __construct(SerializerInterface $serializer, ProductRepository $productRepository, JMS $jms)
     {
         $this->cache = new FilesystemAdapter();
         $this->serializer = $serializer;
+        $this->jms = $jms;
         $this->productRepository = $productRepository;
     }
 
@@ -52,20 +55,22 @@ class ProductController extends AbstractController
         );
     }
 
-    #[Route('/{id}', name: 'get_product', methods: ['GET'])]
+    /**     
+     * @Route("/{id}", name="get_product", methods={"GET"})
+     */
     public function product($id): JsonResponse
     {
         $this->id = intval($id);
 
         $response = $this->cache->get('product_item_' . $this->id, function (ItemInterface $item, $product) {
-            $item->expiresAfter(3600);
-            $product = $this->productRepository->findOneBy(['id' => $this->id]);
+            $item->expiresAfter(1);
+            $product = $this->productRepository->findOneById($this->id);
 
-            if ($this->productRepository->findOneBy(['id' => $this->id]) === NULL || !is_int($this->id)) {
+            if ($product === NULL || !is_int($this->id)) {
                 throw new HttpException(404);
             }
 
-            return $this->serializer->serialize($product, 'json');
+            return $this->jms->serialize($product, 'json');
         });
 
         return new JsonResponse(

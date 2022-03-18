@@ -48,13 +48,15 @@ class UserController extends AbstractController
         );
     }
 
-    #[Route('{id}', name: 'get', methods: ['GET'])]
-    public function user($id): JsonResponse
+    #[Route('{id}', name: 'get_user', methods: ['GET'])]
+    public function user($id, UserRepository $userRepository): JsonResponse
     {
-        $response = $this->cache->get('user_' . $id, function (ItemInterface $item, UserRepository $userRepository, $id) {
+        $this->paginator = $userRepository->findOneById([$id]);
+
+        $response = $this->cache->get('user_item_' . $id, function (ItemInterface $item) {
             $item->expiresAfter(3600);
 
-            return $this->serializer->serialize($userRepository->findOneById([$id]), 'json', ['groups' => 'user']);
+            return $this->serializer->serialize($this->paginator, 'json', ['groups' => 'user']);
         });
 
         return new JsonResponse(

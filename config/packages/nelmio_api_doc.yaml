@@ -1,11 +1,19 @@
 nelmio_api_doc:
   documentation:
-    info:
-      title: BileMo
-      description: API to manage products and users
-      version: 1.0.0
     servers:
-      -urls: https://localhost:8000/api/
-  areas: # to filter documented areas
-    path_patterns:
-      - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+      - url: http://localhost:8000/api
+        description: API over HTTP
+      - url: https://localhost:8000/api
+        description: API over HTTPS
+    info:
+      title: My App
+      description: This is an awesome app!
+      version: 1.0.0
+    components:
+      securitySchemes:
+        Bearer:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+    security:
+      - Bearer: []
