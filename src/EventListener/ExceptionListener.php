@@ -31,6 +31,8 @@ class ExceptionListener
                 case 500:
                     $message = "Erreur serveur";
                     break;
+                case 400:
+                    
                 default:
                     $message = "Erreur survenue";
                     break;

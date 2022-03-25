@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,11 +21,7 @@ class CustomerController extends AbstractController
      * 
      * @OA\Response(
      *      response=201,
-     *      description="Creates a user",
-     *      @OA\JsonContent(
-     *          type="array",
-     *          @OA\Items(ref=@Model(type=User::class, groups={"user"}))
-     *      )
+     *      description="Creates a user"
      * )
      * @OA\Tag(name="user")
      * @Security(name="Bearer")
@@ -53,11 +50,7 @@ class CustomerController extends AbstractController
      * 
      * @OA\Response(
      *      response=204,
-     *      description="Deletes an user",
-     *      @OA\JsonContent(
-     *          type="array",
-     *          @OA\Items(ref=@Model(type=User::class, groups={"user"}))
-     *      )
+     *      description="Deletes an user"
      * )
      * @OA\Parameter(
      *     name="id",

@@ -3,46 +3,59 @@
 namespace App\Entity;
 
 use App\Repository\CustomerRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation as Serializer;
 
+#[Serializer\XmlRoot("customer")]
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
-class Customer implements PasswordAuthenticatedUserInterface
+class Customer implements PasswordAuthenticatedUserInterface, UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     #[Groups(["customer"])]
+    #[Serializer\XmlAttribute]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $firstName;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $lastName;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $password;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Groups(["customer"])]
     private $email;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $phoneNumber;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $address;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $postalCode;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $city;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["customer"])]
     private $country;
 
     #[ORM\Column(type: 'array')]
@@ -209,5 +222,35 @@ class Customer implements PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 }

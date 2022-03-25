@@ -30,11 +30,7 @@ class UserController extends AbstractController
      * 
      * @OA\Response(
      *      response=200, 
-     *      description="Displays the list of users for a specific customer",
-     *      @OA\JsonContent(
-     *          type="array",
-     *          @OA\Items(ref=@Model(type=User::class, groups={"user"}))
-     *      )
+     *      description="Displays the list of users for a specific customer"
      * )
      * @OA\Parameter(
      *     name="customerId",
@@ -45,7 +41,7 @@ class UserController extends AbstractController
      * @OA\Tag(name="users")
      * @Security(name="Bearer")
      */
-    #[Route('customer/{customerId}', name: 'all_by_customer', methods: ['GET'])]
+    #[Route("customer/{customerId}", name: "all_by_customer", methods: ["GET"])]
     public function getUserForCustomer(UserRepository $userRepository, Request $request, $customerId): JsonResponse
     {
         if (0 < intval($request->query->get('page'))) {
@@ -53,7 +49,6 @@ class UserController extends AbstractController
         } else {
             $page = 1;
         }
-        dd("test");
 
         $this->paginator = $userRepository->findByCustomer([$customerId]);
 
@@ -71,7 +66,23 @@ class UserController extends AbstractController
         );
     }
 
-    #[Route('{id}', name: 'get_user', methods: ['GET'])]
+    /**
+     * List a specific user
+     * 
+     * @OA\Response(
+     *      response=200, 
+     *      description="Displays a specific user"
+     * )
+     * @OA\Parameter(
+     *     name="id",
+     *     in="path",
+     *     description="The user field to find the specific user",
+     *     @OA\Schema(type="int")
+     * )
+     * @OA\Tag(name="users")
+     * @Security(name="Bearer")
+     */
+    #[Route("{id}", name: "get_user", methods: ["GET"])]
     public function user($id, UserRepository $userRepository): JsonResponse
     {
         $this->paginator = $userRepository->findOneById([$id]);

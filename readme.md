@@ -46,7 +46,7 @@ You can execute this command line to run a local web server: `symfony serve -d`
 - You should first install Postman: https://www.postman.com/
 - Then you have to go to /api/login_check with a POST method using these logins:
   {
-  "username": "aurore60",
+  "email": "alix12@rey.com",
   "password": "password"
   }
 - You will get a token.

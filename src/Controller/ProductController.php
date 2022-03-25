@@ -33,11 +33,7 @@ class ProductController extends AbstractController
      * 
      * @OA\Response(
      *      response=200,
-     *      description="Displays the list of phone products",
-     *      @OA\JsonContent(
-     *          type="array",
-     *          @OA\Items(ref=@Model(type=Product::class, groups={"product"}))
-     *      )
+     *      description="Displays the list of phone products"
      * )
      * @OA\Tag(name="products")
      * @Security(name="Bearer")
@@ -72,11 +68,7 @@ class ProductController extends AbstractController
      * 
      * @OA\Response(
      *      response=200,
-     *      description="Returns a product",
-     *      @OA\JsonContent(
-     *          type="array",
-     *          @OA\Items(ref=@Model(type=Product::class, groups={"product"}))
-     *      )
+     *      description="Returns a product"
      * )
      * @OA\Parameter(
      *     name="id",

@@ -10,8 +10,8 @@ security:
   providers:
     doctrine:
       entity:
-        class: App\Entity\User
-        property: username
+        class: App\Entity\Customer
+        property: email
   firewalls:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
