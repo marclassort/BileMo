@@ -10,19 +10,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Hateoas\Configuration\Annotation as Hateoas;
 use JMS\Serializer\Annotation as Serializer;
 
+#[Serializer\XmlRoot("user")]
+#[Hateoas\Relation("self", href: "expr('/api/users/customer/' ~ object.getId())")]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-/**
- * @Serializer\XmlRoot("user")
- * 
- * @Hateoas\Relation("self", href = "expr('/api/users/' ~ object.getId())")
- */
 class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     #[Groups(["user"])]
-    /** @Serializer\XmlAttribute */
+    #[Serializer\XmlAttribute]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]

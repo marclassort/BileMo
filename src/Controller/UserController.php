@@ -3,13 +3,15 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface as Serializer;
 use Symfony\Contracts\Cache\ItemInterface;
+use OpenApi\Annotations as OA;
 
 #[Route('/api/users/', name: 'api_users_')]
 class UserController extends AbstractController
@@ -17,12 +19,26 @@ class UserController extends AbstractController
     private $cache;
     private $paginator;
 
-    public function __construct(SerializerInterface $serializer)
+    public function __construct(Serializer $serializer)
     {
         $this->cache = new FilesystemAdapter();
         $this->serializer = $serializer;
     }
 
+    /**
+     * @OA\Response(
+     *  response=200, 
+     *  description="Displays the list of users for a specific customer"
+     * )
+     * @OA\Parameter(
+     *     name="customerId",
+     *     in="path",
+     *     description="The customer field to find all relative users",
+     *     @OA\Schema(type="int")
+     * )
+     * @OA\Tag(name="users")
+     * @Security(name="Bearer")
+     */
     #[Route('customer/{customerId}', name: 'all_by_customer', methods: ['GET'])]
     public function getUserForCustomer(UserRepository $userRepository, Request $request, $customerId): JsonResponse
     {
@@ -48,6 +64,20 @@ class UserController extends AbstractController
         );
     }
 
+    /**
+     * @OA\Response(
+     *     response=200,
+     *     description="Returns a user"
+     * )
+     * @OA\Parameter(
+     *     name="id",
+     *     in="path",
+     *     description="The field used to find the user",
+     *     @OA\Schema(type="int")
+     * )
+     * @OA\Tag(name="user")
+     * @Security(name="Bearer")
+     */
     #[Route('{id}', name: 'get_user', methods: ['GET'])]
     public function user($id, UserRepository $userRepository): JsonResponse
     {
