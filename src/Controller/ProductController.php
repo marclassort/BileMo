@@ -29,9 +29,15 @@ class ProductController extends AbstractController
     }
 
     /**
+     * List all phone products. 
+     * 
      * @OA\Response(
-     *  response=200, 
-     *  description="Displays the list of phone products"
+     *      response=200,
+     *      description="Displays the list of phone products",
+     *      @OA\JsonContent(
+     *          type="array",
+     *          @OA\Items(ref=@Model(type=Product::class, groups={"product"}))
+     *      )
      * )
      * @OA\Tag(name="products")
      * @Security(name="Bearer")
@@ -62,9 +68,15 @@ class ProductController extends AbstractController
     }
 
     /**
+     * List a specific product. 
+     * 
      * @OA\Response(
-     *     response=200,
-     *     description="Returns a product"
+     *      response=200,
+     *      description="Returns a product",
+     *      @OA\JsonContent(
+     *          type="array",
+     *          @OA\Items(ref=@Model(type=Product::class, groups={"product"}))
+     *      )
      * )
      * @OA\Parameter(
      *     name="id",
@@ -72,7 +84,7 @@ class ProductController extends AbstractController
      *     description="The field used to find the product",
      *     @OA\Schema(type="int")
      * )
-     * @OA\Tag(name="products")
+     * @OA\Tag(name="product")
      * @Security(name="Bearer")
      */
     #[Route("/{id}", name: "get_product", methods: ["GET"])]

@@ -26,9 +26,15 @@ class UserController extends AbstractController
     }
 
     /**
+     * List the users of the specified customer. 
+     * 
      * @OA\Response(
-     *  response=200, 
-     *  description="Displays the list of users for a specific customer"
+     *      response=200, 
+     *      description="Displays the list of users for a specific customer",
+     *      @OA\JsonContent(
+     *          type="array",
+     *          @OA\Items(ref=@Model(type=User::class, groups={"user"}))
+     *      )
      * )
      * @OA\Parameter(
      *     name="customerId",
@@ -47,11 +53,12 @@ class UserController extends AbstractController
         } else {
             $page = 1;
         }
+        dd("test");
 
         $this->paginator = $userRepository->findByCustomer([$customerId]);
 
         $response = $this->cache->get('user_collection_' . $page, function (ItemInterface $item) {
-            $item->expiresAfter(3600);
+            $item->expiresAfter(1);
 
             return $this->serializer->serialize($this->paginator, 'json', ['groups' => 'user']);
         });
@@ -64,27 +71,13 @@ class UserController extends AbstractController
         );
     }
 
-    /**
-     * @OA\Response(
-     *     response=200,
-     *     description="Returns a user"
-     * )
-     * @OA\Parameter(
-     *     name="id",
-     *     in="path",
-     *     description="The field used to find the user",
-     *     @OA\Schema(type="int")
-     * )
-     * @OA\Tag(name="user")
-     * @Security(name="Bearer")
-     */
     #[Route('{id}', name: 'get_user', methods: ['GET'])]
     public function user($id, UserRepository $userRepository): JsonResponse
     {
         $this->paginator = $userRepository->findOneById([$id]);
 
         $response = $this->cache->get('user_item_' . $id, function (ItemInterface $item) {
-            $item->expiresAfter(3600);
+            $item->expiresAfter(1);
 
             return $this->serializer->serialize($this->paginator, 'json', ['groups' => 'user']);
         });

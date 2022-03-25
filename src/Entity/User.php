@@ -11,8 +11,19 @@ use Hateoas\Configuration\Annotation as Hateoas;
 use JMS\Serializer\Annotation as Serializer;
 
 #[Serializer\XmlRoot("user")]
-#[Hateoas\Relation("self", href: "expr('/api/users/customer/' ~ object.getId())")]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+/**
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "get_user",
+ *          parameters = {
+ *              "id" = "expr(object.getId())"
+ *          },
+ *          absolute = true
+ *      )
+ * )
+ */
 class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     #[ORM\Id]
