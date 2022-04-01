@@ -58,8 +58,8 @@ class Customer implements PasswordAuthenticatedUserInterface, UserInterface
     #[Groups(["customer"])]
     private $country;
 
-    #[ORM\Column(type: 'array')]
-    private $role = [];
+    #[ORM\Column(type: 'json')]
+    private $roles = [];
 
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: User::class)]
     private $users;
@@ -182,18 +182,6 @@ class Customer implements PasswordAuthenticatedUserInterface, UserInterface
         return $this;
     }
 
-    public function getRole(): ?array
-    {
-        return $this->role;
-    }
-
-    public function setRole(array $role): self
-    {
-        $this->role = $role;
-
-        return $this;
-    }
-
     /**
      * @return Collection|User[]
      */
@@ -243,6 +231,13 @@ class Customer implements PasswordAuthenticatedUserInterface, UserInterface
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
         return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
     }
 
     /**

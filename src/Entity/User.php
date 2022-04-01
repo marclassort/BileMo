@@ -4,8 +4,6 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Hateoas\Configuration\Annotation as Hateoas;
 use JMS\Serializer\Annotation as Serializer;
@@ -24,7 +22,7 @@ use JMS\Serializer\Annotation as Serializer;
  *      )
  * )
  */
-class User implements PasswordAuthenticatedUserInterface, UserInterface
+class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -55,9 +53,6 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: 'array')]
     private $role = [];
-
-    #[ORM\Column(type: 'array')]
-    private $roles = [];
 
     #[ORM\ManyToOne(targetEntity: Customer::class, inversedBy: 'users')]
     private $customer;
@@ -149,35 +144,5 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
         $this->customer = $customer;
 
         return $this;
-    }
-
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-        return array_unique($roles);
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function eraseCredentials()
-    {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
     }
 }

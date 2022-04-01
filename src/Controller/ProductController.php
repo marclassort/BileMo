@@ -14,7 +14,9 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use OpenApi\Annotations as OA;
 
-#[Route('/api/products')]
+/**
+ * @Route("/api/products")
+ */
 class ProductController extends AbstractController
 {
     private $cache;
@@ -29,7 +31,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * List all phone products. 
+     * Lists all phone products. 
      * 
      * @OA\Response(
      *      response=200,
@@ -37,8 +39,8 @@ class ProductController extends AbstractController
      * )
      * @OA\Tag(name="products")
      * @Security(name="Bearer")
+     * @Route(name="product_list", methods={"GET"})
      */
-    #[Route(name: "product_list", methods: ["GET"])]
     public function all(ProductRepository $productRepository, Request $request): JsonResponse
     {
         if (0 < intval($request->query->get('page'))) {
@@ -47,6 +49,7 @@ class ProductController extends AbstractController
             $page = 1;
         }
 
+        // $this->paginator = $productRepository->getPaginatedProducts($page);
         $this->paginator = $productRepository->findAll();
 
         $response = $this->cache->get('product_collection_' . $page, function (ItemInterface $item) {
@@ -64,7 +67,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * List a specific product. 
+     * Lists a specific product. 
      * 
      * @OA\Response(
      *      response=200,
@@ -78,8 +81,8 @@ class ProductController extends AbstractController
      * )
      * @OA\Tag(name="product")
      * @Security(name="Bearer")
+     * @Route("/{id}", name="get_product", methods={"GET"})
      */
-    #[Route("/{id}", name: "get_product", methods: ["GET"])]
     public function product($id): JsonResponse
     {
         $this->id = intval($id);
