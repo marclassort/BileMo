@@ -11,6 +11,7 @@ class QueryHandler
         return $repository->createQueryBuilder($table)
             ->setMaxResults($numberPerPage)
             ->setFirstResult(($page - 1) * $numberPerPage)
-            ->getQuery();
+            ->getQuery()
+            ->getResult();
     }
 }

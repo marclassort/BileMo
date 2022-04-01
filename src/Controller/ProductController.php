@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use JMS\Serializer\SerializerInterface as Serializer;
+use Knp\Component\Pager\Paginator;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use OpenApi\Annotations as OA;
@@ -49,11 +50,17 @@ class ProductController extends AbstractController
             $page = 1;
         }
 
-        // $this->paginator = $productRepository->getPaginatedProducts($page);
-        $this->paginator = $productRepository->findAll();
+        $this->paginator = $productRepository->getPaginatedProducts($page);
+
+        if ($this->paginator->getQuery() === []) {
+            return new JsonResponse(
+                null,
+                JsonResponse::HTTP_NOT_FOUND
+            );
+        }
 
         $response = $this->cache->get('product_collection_' . $page, function (ItemInterface $item) {
-            $item->expiresAfter(1);
+            $item->expiresAfter(3600);
 
             return $this->serializer->serialize($this->paginator, 'json');
         });
