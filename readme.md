@@ -41,7 +41,7 @@ Then, you can create your database as running the following command lines:
 
 You can execute this command line to run a local web server: `symfony serve -d`
 
-## **Use postman**
+## **Use POSTMAN**
 
 - You should first install Postman: https://www.postman.com/
 - Then you have to go to /api/login_check with a POST method using these logins:
@@ -52,21 +52,13 @@ You can execute this command line to run a local web server: `symfony serve -d`
 - You will get a token.
 - Go to Headers > Key. You will add "Authorization"
 - On Headers > Value, add "Bearer" and paste your token.
+- Go to https://localhost:yourport/api/doc.json.
 - You can then get the different links of the API.
 
 ## **Documentation**
 
-The JSON documentation will be available here:
+The JSON documentation is available here:
 
-- api/doc.json
+- https://localhost:yourpost/api/doc.json
 
 **NOW you can run the API!**
-When the site is run, you can log using the following login and password:
-
-- Login: **fonctionnaire**
-- Password: **OpenClassrooms**
-
-## **Code checking**
-
-- **CodeClimate**: https://codeclimate.com/github/marclassort/Blog-PHP-Marc-Lassort
-- **SonarCloud**: https://sonarcloud.io/project/overview?id=marclassort_Blog-PHP-Marc-Lassort

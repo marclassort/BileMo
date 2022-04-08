@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use JMS\Serializer\SerializerInterface as Serializer;
-use Knp\Component\Pager\Paginator;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use OpenApi\Annotations as OA;

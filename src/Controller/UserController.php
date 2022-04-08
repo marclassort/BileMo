@@ -49,7 +49,7 @@ class UserController extends AbstractController
             $page = 1;
         }
 
-        $this->paginator = $userRepository->findAll();
+        $this->paginator = $userRepository->getPaginatedUsers($page);
 
         $response = $this->cache->get('user_collection_' . $page, function (ItemInterface $item) {
             $item->expiresAfter(1);
