@@ -98,7 +98,7 @@ class UserController extends AbstractController
             throw new HttpException(400);
         }
 
-        $response = $this->cache->get('user_collection_' . $page, function (ItemInterface $item) {
+        $response = $this->cache->get('users_collection_' . $page, function (ItemInterface $item) {
             $item->expiresAfter(1);
 
 
