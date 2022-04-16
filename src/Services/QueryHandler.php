@@ -14,4 +14,16 @@ class QueryHandler
             ->getQuery()
             ->getResult();
     }
+
+    public function createQueryWithWhere(ServiceEntityRepository $repository, string $table, string $secondTable, int $numberPerPage, int $page, $value)
+    {
+        return $repository->createQueryBuilder($table)
+            ->innerJoin('App\Entity\Customer', $secondTable, 'WITH', $secondTable . ' = ' . $table . '.customer')
+            ->where($secondTable . '.id = :val')
+            ->setParameter('val', $value)
+            ->setMaxResults($numberPerPage)
+            ->setFirstResult(($page - 1) * $numberPerPage)
+            ->getQuery()
+            ->getResult();
+    }
 }

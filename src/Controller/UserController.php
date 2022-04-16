@@ -52,7 +52,7 @@ class UserController extends AbstractController
         $this->paginator = $userRepository->getPaginatedUsers($page);
 
         $response = $this->cache->get('user_collection_' . $page, function (ItemInterface $item) {
-            $item->expiresAfter(1);
+            $item->expiresAfter(3600);
 
             return $this->serializer->serialize($this->paginator, 'json');
         });
@@ -70,7 +70,7 @@ class UserController extends AbstractController
      * 
      * @OA\Response(
      *      response=200,
-     *      description="Returns a user according to a customer"
+     *      description="Returns all users according to a customer"
      * )
      * @OA\Parameter(
      *      name="id",
@@ -82,20 +82,22 @@ class UserController extends AbstractController
      * @Security(name="Bearer")
      * @Route("/customer/{id}", methods={"GET"})
      */
-    public function getSpecificUserByCustomer($id): JsonResponse
+    public function getUsersByCustomer(Request $request, $id): JsonResponse
     {
+        if (0 < intval($request->query->get('page'))) {
+            $page = intval($request->query->get('page'));
+        } else {
+            $page = 1;
+        }
+
         $this->id = intval($id);
 
-        $response = $this->cache->get('user_item_' . $this->id, function (ItemInterface $item) {
-            $item->expiresAfter(3600);
-            $user =
-                $this->userRepository->findByCustomer([$this->id]);
+        $this->paginator = $this->userRepository->getPaginatedUsersByCustomer($page, $this->id);
 
-            if ($user === NULL || !is_int($this->id)) {
-                throw new HttpException(404);
-            }
+        $response = $this->cache->get('user_collection_' . $page, function (ItemInterface $item) {
+            $item->expiresAfter(1);
 
-            return $this->serializer->serialize($user, 'json');
+            return $this->serializer->serialize($this->paginator, 'json');
         });
 
         return new JsonResponse(

@@ -36,6 +36,7 @@ Then, you can create your database as running the following command lines:
 - **JMSSerializerBundle**: serializes the data
 - **BazingaHateoasBundle**: implements the 3rd level of Richardson model
 - **NelmioApiDocBundle**: allows to document the API
+- **JWT Authentication Bundle**: implements authentication with token to the API
 
 ## **Run a local web server**
 

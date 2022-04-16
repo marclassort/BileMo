@@ -35,4 +35,18 @@ class UserRepository extends ServiceEntityRepository
 
         return new Paginator($query);
     }
+
+    /**
+     * @param int $page
+     * @return Paginator
+     */
+    public function getPaginatedUsersByCustomer(int $page, int $id)
+    {
+        $queryHandler = new QueryHandler();
+
+        $query = $queryHandler->createQueryWithWhere($this, 'p', 'j', self::USERS_PER_PAGE, $page, $id);
+
+        return new Paginator($query);
+        
+    }
 }
