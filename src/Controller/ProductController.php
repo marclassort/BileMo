@@ -87,7 +87,7 @@ class ProductController extends AbstractController
      * )
      * @OA\Tag(name="product")
      * @Security(name="Bearer")
-     * @Route("/{id}", name="get_product", methods={"GET"})
+     * @Route("/{id}", name="get_product", methods={"GET"}, requirements={"id"="\d+"})
      */
     public function product($id): JsonResponse
     {

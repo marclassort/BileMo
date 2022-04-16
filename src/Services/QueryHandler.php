@@ -19,7 +19,7 @@ class QueryHandler
     {
         return $repository->createQueryBuilder($table)
             ->innerJoin('App\Entity\Customer', $secondTable, 'WITH', $secondTable . ' = ' . $table . '.customer')
-            ->where($secondTable . '.id = :val')
+            ->andWhere($secondTable . '.id = :val')
             ->setParameter('val', $value)
             ->setMaxResults($numberPerPage)
             ->setFirstResult(($page - 1) * $numberPerPage)

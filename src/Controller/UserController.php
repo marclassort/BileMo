@@ -94,8 +94,13 @@ class UserController extends AbstractController
 
         $this->paginator = $this->userRepository->getPaginatedUsersByCustomer($page, $this->id);
 
+        if ($this->paginator->getQuery() === [] || !is_int($this->id)) {
+            throw new HttpException(400);
+        }
+
         $response = $this->cache->get('user_collection_' . $page, function (ItemInterface $item) {
             $item->expiresAfter(1);
+
 
             return $this->serializer->serialize($this->paginator, 'json');
         });
@@ -123,7 +128,7 @@ class UserController extends AbstractController
      * )
      * @OA\Tag(name="users")
      * @Security(name="Bearer")
-     * @Route("/{id}", name="get_user", methods={"GET"})
+     * @Route("/{id}", name="get_user", methods={"GET"}, requirements={"id"="\d+"})
      */
     public function getSpecificUser($id): JsonResponse
     {

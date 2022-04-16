@@ -68,7 +68,7 @@ class CustomerController extends AbstractController
      * )
      * @OA\Tag(name="user")
      * @Security(name="Bearer")
-     * @Route("/delete/{id}", name="delete", methods={"DELETE"})
+     * @Route("/delete/{id}", name="delete", methods={"DELETE"}, requirements={"id"="\d+"})
      */
     public function delete(
         UserRepository $userRepository,
